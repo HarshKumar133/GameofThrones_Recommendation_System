@@ -18,13 +18,13 @@ This comprehensive Prolog knowledge base contains:
 ### Option 1: Online Prolog Compiler (Recommended)
 1. Go to [SWISH - SWI-Prolog for SHaring](https://swish.swi-prolog.org/)
 2. Create a new program
-3. Copy and paste the entire `game_of_thrones_kb.pl` file
+3. Copy and paste the entire `GOT_Recommender_game.pl` file
 4. Click "Run" 
 5. Start querying in the console below!
 
 ### Option 2: Local Installation
 1. Install SWI-Prolog from [https://www.swi-prolog.org/Download.html](https://www.swi-prolog.org/Download.html)
-2. Download the `game_of_thrones_kb.pl` file
+2. Download the `GOT_Recommender_game.pl` file
 3. Open terminal/command prompt
 4. Navigate to the file directory
 5. Run: `swipl game_of_thrones_kb.pl`
