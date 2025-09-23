@@ -253,6 +253,16 @@ tragic_love(X, Y) :-
 - **Recommendations**: Multiple AI-powered suggestion systems
 - **Time Period**: Complete series (Seasons 1-8)
 
+## Contributing
+
+Want to enhance the system? Consider adding:
+- More minor characters
+- Additional character traits
+- New recommendation algorithms
+- Book-based information
+- Season-specific analysis
+- Fix Issues and Wrong Information
+
 ## Future Enhancements
 
 - House Targaryen restoration scenarios
