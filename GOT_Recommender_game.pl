@@ -251,7 +251,9 @@ status(doran_martell, dead).
 status(trystane_martell, dead).
 status(obara_sand, dead).
 status(nymeria_sand, dead).
-status(tyene_sand, dead).
+% Add missing character statuses
+status(ygritte, dead).
+status(val, unknown). % Book character
 
 %_____________________________________________________________________________
 % POLITICAL POSITIONS AND TITLES
@@ -370,18 +372,58 @@ potential_ruler(Person) :-
 %_____________________________________________________________________________
 % RECOMMENDATION SYSTEMS
 
-% Marriage Alliance Recommendations
+% CANONICAL RELATIONSHIPS AND MARRIAGES
+% Historical/Canon romantic relationships
+romantic_relationship(jon_snow, ygritte, love).
+romantic_relationship(jon_snow, daenerys_targaryen, political_and_love).
+romantic_relationship(jaime_lannister, cersei_lannister, forbidden_love).
+romantic_relationship(tyrion_lannister, sansa_stark, arranged_marriage).
+romantic_relationship(gendry, arya_stark, romantic_interest).
+romantic_relationship(samwell_tarly, gilly, love).
+romantic_relationship(jorah_mormont, daenerys_targaryen, unrequited_love).
+
+% Marriage Alliance Recommendations (Canon-compliant)
 marriage_recommendation(Person1, Person2, Reason) :-
     status(Person1, alive),
     status(Person2, alive),
     dif(Person1, Person2),
-    house_member(Person1, House1),
-    house_member(Person2, House2),
-    dif(House1, House2),
+    % Must be different genders
+    ((male(Person1), female(Person2)) ; (female(Person1), male(Person2))),
+    % Cannot be close family
     \+ sibling(Person1, Person2),
     \+ parent(Person1, Person2),
     \+ parent(Person2, Person1),
+    \+ aunt(Person1, Person2),
+    \+ aunt(Person2, Person1),
+    \+ uncle(Person1, Person2),
+    \+ uncle(Person2, Person1),
+    % Must be from different houses (for political alliances)
+    house_member(Person1, House1),
+    house_member(Person2, House2),
+    dif(House1, House2),
+    % Additional canon checks
+    \+ too_close_relatives(Person1, Person2),
     Reason = political_alliance.
+
+% Define what constitutes "too close" relatives (Stark "siblings")
+too_close_relatives(jon_snow, arya_stark).
+too_close_relatives(jon_snow, sansa_stark).
+too_close_relatives(jon_snow, bran_stark).
+too_close_relatives(arya_stark, jon_snow).
+too_close_relatives(sansa_stark, jon_snow).
+too_close_relatives(bran_stark, jon_snow).
+too_close_relatives(arya_stark, sansa_stark).
+too_close_relatives(arya_stark, bran_stark).
+too_close_relatives(sansa_stark, bran_stark).
+too_close_relatives(sansa_stark, arya_stark).
+too_close_relatives(bran_stark, arya_stark).
+too_close_relatives(bran_stark, sansa_stark).
+
+% Canonical marriage possibilities for Jon Snow specifically
+jon_marriage_options(daenerys_targaryen, political_and_romantic) :- 
+    status(daenerys_targaryen, dead). % Historical relationship
+jon_marriage_options(ygritte, true_love) :- 
+    status(ygritte, dead). % Historical relationship
 
 % Strategic Alliance Recommendations
 alliance_recommendation(Person1, Person2, Reason) :-
@@ -454,9 +496,29 @@ powerful_house(House) :-
     status(Person, alive),
     title(Person, _).
 
-% Best match for marriage
-best_marriage_match(Person, Matches) :-
-    findall([Partner, Reason], marriage_recommendation(Person, Partner, Reason), Matches).
+% Canon-compliant marriage query for specific characters
+canonical_marriage_options(jon_snow, Partner, Reason) :-
+    (Partner = ygritte, Reason = true_love, status(ygritte, dead));
+    (Partner = daenerys_targaryen, Reason = political_and_romantic, status(daenerys_targaryen, dead));
+    (Partner = val, Reason = political_alliance, status(val, unknown)). % Book only
+
+% Realistic current marriage options (alive characters only)
+realistic_marriage_options(Person, Partner, Reason) :-
+    status(Person, alive),
+    status(Partner, alive),
+    dif(Person, Partner),
+    % Gender compatibility
+    ((male(Person), female(Partner)) ; (female(Person), male(Partner))),
+    % No close blood relations
+    \+ too_close_relatives(Person, Partner),
+    \+ sibling(Person, Partner),
+    \+ parent(Person, Partner),
+    \+ parent(Partner, Person),
+    % Different houses for political benefit
+    house_member(Person, House1),
+    house_member(Partner, House2),
+    dif(House1, House2),
+    Reason = political_alliance.
 
 % Strategic recommendations for a character
 strategic_advice(Person, Advice) :-
@@ -465,7 +527,9 @@ strategic_advice(Person, Advice) :-
         (leadership_recommendation(Person, Position, Reason), Action = seek_position(Position))
     ), Advice).
 
-% Character analysis
+% Best match for marriage (canon-compliant)
+best_marriage_match(Person, Matches) :-
+    findall([Partner, Reason], realistic_marriage_options(Person, Partner, Reason), Matches).
 character_profile(Person) :-
     status(Person, Status),
     format('~w - Status: ~w~n', [Person, Status]),
