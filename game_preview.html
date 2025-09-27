@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Thrones Knowledge Base Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #2d1b1b 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(15, 15, 15, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(45deg, #8b0000, #4a0404);
+            border-radius: 15px 15px 0 0;
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0;
+            margin: 0;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-tab.active {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #e8e8e8;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #8b0000, #4a0404);
+            color: #ffd700;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #a00000, #5a0505);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 0, 0, 0.4);
+        }
+
+        .card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .character-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.9), rgba(30, 30, 30, 0.9));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .character-card:hover::before {
+            left: 100%;
+        }
+
+        .character-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .character-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-alive {
+            background: linear-gradient(45deg, #228b22, #32cd32);
+            color: white;
+        }
+
+        .status-dead {
+            background: linear-gradient(45deg, #8b0000, #dc143c);
+            color: white;
+        }
+
+        .status-unknown {
+            background: linear-gradient(45deg, #696969, #a9a9a9);
+            color: white;
+        }
+
+        .trait-tag {
+            display: inline-block;
+            background: linear-gradient(45deg, rgba(139, 0, 0, 0.3), rgba(74, 4, 4, 0.3));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        .house-badge {
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+            text-transform: capitalize;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.2), rgba(74, 4, 4, 0.2));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .relationship-tree {
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .alliance-card {
+            background: linear-gradient(45deg, rgba(0, 100, 0, 0.1), rgba(0, 128, 0, 0.1));
+            border-left: 4px solid #32cd32;
+        }
+
+        .marriage-card {
+            background: linear-gradient(45deg, rgba(255, 20, 147, 0.1), rgba(199, 21, 133, 0.1));
+            border-left: 4px solid #ff1493;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>⚔️ Game of Thrones Knowledge Base ⚔️</h1>
+            <p>Explore the complex world of Westeros through data and relationships</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('characters')">Characters</button>
+            <button class="nav-tab" onclick="showTab('houses')">Houses</button>
+            <button class="nav-tab" onclick="showTab('relationships')">Family Tree</button>
+            <button class="nav-tab" onclick="showTab('alliances')">Politics</button>
+            <button class="nav-tab" onclick="showTab('stats')">Statistics</button>
+        </nav>
+
+        <div class="content">
+            <!-- Characters Tab -->
+            <div id="characters" class="tab-pane active">
+                <div class="search-section">
+                    <input type="text" class="search-box" id="characterSearch" placeholder="Search characters..." oninput="filterCharacters()">
+                    <div class="filters">
+                        <button class="filter-btn active" onclick="filterByStatus('all')">All</button>
+                        <button class="filter-btn" onclick="filterByStatus('alive')">Alive</button>
+                        <button class="filter-btn" onclick="filterByStatus('dead')">Dead</button>
+                        <button class="filter-btn" onclick="filterByGender('male')">Male</button>
+                        <button class="filter-btn" onclick="filterByGender('female')">Female</button>
+                    </div>
+                </div>
+                <div id="charactersGrid" class="character-grid"></div>
+            </div>
+
+            <!-- Houses Tab -->
+            <div id="houses" class="tab-pane">
+                <div id="housesContent"></div>
+            </div>
+
+            <!-- Relationships Tab -->
+            <div id="relationships" class="tab-pane">
+                <div class="search-section">
+                    <input type="text" class="search-box" id="familySearch" placeholder="Enter character name for family tree...">
+                    <button class="btn" onclick="showFamilyTree()">Show Family Tree</button>
+                </div>
+                <div id="familyTreeContent"></div>
+            </div>
+
+            <!-- Alliances Tab -->
+            <div id="alliances" class="tab-pane">
+                <h2 style="color: #ffd700; margin-bottom: 20px;">Political Alliances & Marriage Recommendations</h2>
+                <div id="alliancesContent"></div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div id="stats" class="tab-pane">
+                <div id="statisticsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game of Thrones data structure
+        const gotData = {
+            characters: {
+                // House Stark
+                'jon_snow': { house: 'stark', status: 'alive', gender: 'male', title: 'nights_watch_commander', traits: ['honorable', 'brave', 'loyal', 'brooding'] },
+                'sansa_stark': { house: 'stark', status: 'alive', gender: 'female', title: 'queen_in_the_north', traits: ['political', 'resilient', 'diplomatic', 'cautious'] },
+                'arya_stark': { house: 'stark', status: 'alive', gender: 'female', title: 'explorer', traits: ['vengeful', 'independent', 'skilled_fighter', 'loyal'] },
+                'bran_stark': { house: 'stark', status: 'alive', gender: 'male', title: 'king_of_six_kingdoms', traits: ['mystical', 'wise', 'detached', 'omniscient'] },
+                'robb_stark': { house: 'stark', status: 'dead', gender: 'male', traits: [] },
+                'rickon_stark': { house: 'stark', status: 'dead', gender: 'male', traits: [] },
+                'eddard_stark': { house: 'stark', status: 'dead', gender: 'male', traits: [] },
+                'catelyn_stark': { house: 'stark', status: 'dead', gender: 'female', traits: [] },
+                
+                // House Lannister
+                'tyrion_lannister': { house: 'lannister', status: 'alive', gender: 'male', title: 'hand_of_the_king', traits: ['intelligent', 'witty', 'diplomatic', 'alcoholic'] },
+                'cersei_lannister': { house: 'lannister', status: 'dead', gender: 'female', traits: ['ruthless', 'protective', 'paranoid', 'ambitious'] },
+                'jaime_lannister': { house: 'lannister', status: 'dead', gender: 'male', traits: ['skilled_fighter', 'honorable', 'conflicted', 'loyal'] },
+                'tywin_lannister': { house: 'lannister', status: 'dead', gender: 'male', traits: [] },
+                'joffery_lannister': { house: 'lannister', status: 'dead', gender: 'male', traits: [] },
+                'tommen_lannister': { house: 'lannister', status: 'dead', gender: 'male', traits: [] },
+                'myrcella_lannister': { house: 'lannister', status: 'dead', gender: 'female', traits: [] },
+                
+                // House Targaryen
+                'daenerys_targaryen': { house: 'targaryen', status: 'dead', gender: 'female', traits: ['ambitious', 'ruthless', 'idealistic', 'dragon_blood'] },
+                'rhaegar_targaryen': { house: 'targaryen', status: 'dead', gender: 'male', traits: [] },
+                'viserys_targaryen': { house: 'targaryen', status: 'dead', gender: 'male', traits: [] },
+                'aerys_targaryen': { house: 'targaryen', status: 'dead', gender: 'male', traits: [] },
+                
+                // House Baratheon
+                'gendry': { house: 'baratheon', status: 'alive', gender: 'male', title: 'lord_of_storms_end', traits: [] },
+                'robert_baratheon': { house: 'baratheon', status: 'dead', gender: 'male', traits: [] },
+                'stannis_baratheon': { house: 'baratheon', status: 'dead', gender: 'male', traits: [] },
+                'renly_baratheon': { house: 'baratheon', status: 'dead', gender: 'male', traits: [] },
+                'shireen_baratheon': { house: 'baratheon', status: 'dead', gender: 'female', traits: [] },
+                
+                // House Greyjoy
+                'yara_greyjoy': { house: 'greyjoy', status: 'alive', gender: 'female', title: 'lady_of_iron_islands', traits: [] },
+                'theon_greyjoy': { house: 'greyjoy', status: 'dead', gender: 'male', traits: [] },
+                'balon_greyjoy': { house: 'greyjoy', status: 'dead', gender: 'male', traits: [] },
+                'euron_greyjoy': { house: 'greyjoy', status: 'dead', gender: 'male', traits: [] },
+                
+                // House Tarly
+                'samwell_tarly': { house: 'tarly', status: 'alive', gender: 'male', title: 'grand_maester', traits: [] },
+                'randyll_tarly': { house: 'tarly', status: 'dead', gender: 'male', traits: [] },
+                'dickon_tarly': { house: 'tarly', status: 'dead', gender: 'male', traits: [] },
+                
+                // Others
+                'gilly': { house: 'none', status: 'alive', gender: 'female', traits: [] },
+                'sam_jr': { house: 'none', status: 'alive', gender: 'male', traits: [] },
+                'brienne_of_tarth': { house: 'none', status: 'alive', gender: 'female', title: 'lord_commander_kingsguard', traits: [] },
+                'the_hound': { house: 'none', status: 'alive', gender: 'male', traits: [] },
+                'tormund_giantsbane': { house: 'none', status: 'alive', gender: 'male', traits: [] },
+                'jorah_mormont': { house: 'mormont', status: 'dead', gender: 'male', traits: [] },
+                'missandei': { house: 'none', status: 'dead', gender: 'female', traits: [] },
+                'melisandre': { house: 'none', status: 'dead', gender: 'female', traits: [] },
+                'the_mountain': { house: 'none', status: 'dead', gender: 'male', traits: [] },
+            },
+            
+            relationships: {
+                // Stark family tree
+                'eddard_stark': ['robb_stark', 'sansa_stark', 'arya_stark', 'bran_stark', 'rickon_stark'],
+                'catelyn_stark': ['robb_stark', 'sansa_stark', 'arya_stark', 'bran_stark', 'rickon_stark'],
+                'lyanna_stark': ['jon_snow'],
+                'rhaegar_targaryen': ['jon_snow'],
+                
+                // Lannister family tree
+                'tywin_lannister': ['cersei_lannister', 'jaime_lannister', 'tyrion_lannister'],
+                'cersei_lannister': ['joffery_lannister', 'myrcella_lannister', 'tommen_lannister'],
+                'jaime_lannister': ['joffery_lannister', 'myrcella_lannister', 'tommen_lannister'],
+                
+                // Targaryen family tree
+                'aerys_targaryen': ['rhaegar_targaryen', 'viserys_targaryen', 'daenerys_targaryen'],
+                'rhaella_targaryen': ['rhaegar_targaryen', 'viserys_targaryen', 'daenerys_targaryen'],
+                
+                // Other relationships
+                'samwell_tarly': ['sam_jr'],
+                'gilly': ['sam_jr'],
+            },
+            
+            houses: {
+                'stark': { region: 'the_north', motto: 'Winter is Coming', members: ['jon_snow', 'sansa_stark', 'arya_stark', 'bran_stark'] },
+                'lannister': { region: 'westerlands', motto: 'Hear Me Roar', members: ['tyrion_lannister'] },
+                'targaryen': { region: 'dragonstone', motto: 'Fire and Blood', members: [] },
+                'baratheon': { region: 'stormlands', motto: 'Ours is the Fury', members: ['gendry'] },
+                'greyjoy': { region: 'iron_islands', motto: 'We Do Not Sow', members: ['yara_greyjoy'] },
+                'tarly': { region: 'reach', motto: 'First in Battle', members: ['samwell_tarly'] },
+            }
+        };
+
+        // Navigation functions
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-pane').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load content based on tab
+            switch(tabName) {
+                case 'characters':
+                    loadCharacters();
+                    break;
+                case 'houses':
+                    loadHouses();
+                    break;
+                case 'relationships':
+                    loadRelationships();
+                    break;
+                case 'alliances':
+                    loadAlliances();
+                    break;
+                case 'stats':
+                    loadStatistics();
+                    break;
+            }
+        }
+
+        // Character functions
+        function loadCharacters() {
+            const grid = document.getElementById('charactersGrid');
+            grid.innerHTML = '';
+            
+            Object.entries(gotData.characters).forEach(([name, data]) => {
+                const card = createCharacterCard(name, data);
+                grid.appendChild(card);
+            });
+        }
+
+        function createCharacterCard(name, data) {
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            card.dataset.status = data.status;
+            card.dataset.gender = data.gender;
+            card.dataset.house = data.house;
+            
+            const displayName = name.replace(/_/g, ' ');
+            const statusClass = `status-${data.status}`;
+            const traits = data.traits.map(trait => `<span class="trait-tag">${trait.replace(/_/g, ' ')}</span>`).join('');
+            const title = data.title ? `<div style="color: #ff6b35; font-weight: bold; margin: 5px 0;">🏆 ${data.title.replace(/_/g, ' ')}</div>` : '';
+            
+            card.innerHTML = `
+                <div class="character-name">${displayName}</div>
+                <div class="character-status ${statusClass}">${data.status.toUpperCase()}</div>
+                ${title}
+                <div style="margin: 10px 0;">
+                    <strong>Gender:</strong> ${data.gender}<br>
+                    ${data.house !== 'none' ? `<div class="house-badge">House ${data.house}</div>` : ''}
+                </div>
+                ${traits ? `<div style="margin-top: 15px;"><strong>Traits:</strong><br>${traits}</div>` : ''}
+            `;
+            
+            return card;
+        }
+
+        function filterCharacters() {
+            const searchTerm = document.getElementById('characterSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.character-card');
+            
+            cards.forEach(card => {
+                const name = card.querySelector('.character-name').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByStatus(status) {
+            const cards = document.querySelectorAll('.character-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            cards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByGender(gender) {
+            const cards = document.querySelectorAll('.character-card');
+            
+            cards.forEach(card => {
+                if (card.dataset.gender === gender) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Houses functions
+        function loadHouses() {
+            const content = document.getElementById('housesContent');
+            content.innerHTML = '';
+            
+            Object.entries(gotData.houses).forEach(([houseName, houseData]) => {
+                const houseCard = document.createElement('div');
+                houseCard.className = 'card';
+                
+                const livingMembers = houseData.members.filter(member => gotData.characters[member]?.status === 'alive');
+                const deadMembers = houseData.members.filter(member => gotData.characters[member]?.status === 'dead');
+                
+                houseCard.innerHTML = `
+                    <h2 style="color: #ffd700; margin-bottom: 15px;">🏰 House ${houseName.charAt(0).toUpperCase() + houseName.slice(1)}</h2>
+                    <div><strong>Region:</strong> ${houseData.region}</div>
+                    <div><strong>Motto:</strong> "${houseData.motto}"</div>
+                    <div><strong>Living Members:</strong> ${livingMembers.length} (${livingMembers.map(m => m.replace(/_/g, ' ')).join(', ') || 'None'})</div>
+                    <div><strong>Deceased Members:</strong> ${deadMembers.length} (${deadMembers.map(m => m.replace(/_/g, ' ')).join(', ') || 'None'})</div>
+                    <div style="margin-top: 10px;"><strong>House Status:</strong> ${livingMembers.length > 0 ? '🟢 Active' : '🔴 Extinct'}</div>
+                `;
+                
+                content.appendChild(houseCard);
+            });
+        }
+
+        // Family Tree functions
+        function loadRelationships() {
+            const content = document.getElementById('familyTreeContent');
+            content.innerHTML = `
+                <div class="card">
+                    <h3 style="color: #ffd700;">Major Family Lines</h3>
+                    <div class="relationship-tree">
+                        <strong>House Stark Family Tree:</strong><br>
+                        ├── Eddard Stark & Catelyn Stark<br>
+                        │   ├── Robb Stark (deceased)<br>
+                        │   ├── Sansa Stark (Queen in the North)<br>
+                        │   ├── Arya Stark (Explorer)<br>
+                        │   ├── Bran Stark (King of Six Kingdoms)<br>
+                        │   └── Rickon Stark (deceased)<br>
+                        └── Lyanna Stark & Rhaegar Targaryen<br>
+                            └── Jon Snow (Night's Watch Commander)<br><br>
+                        
+                        <strong>House Lannister Family Tree:</strong><br>
+                        └── Tywin Lannister<br>
+                            ├── Cersei Lannister (deceased)<br>
+                            ├── Jaime Lannister (deceased)<br>
+                            └── Tyrion Lannister (Hand of the King)<br><br>
+                        
+                        <strong>House Targaryen Family Tree:</strong><br>
+                        └── Aerys II "The Mad King" (deceased)<br>
+                            ├── Rhaegar Targaryen (deceased)<br>
+                            ├── Viserys Targaryen (deceased)<br>
+                            └── Daenerys Targaryen (deceased)<br>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showFamilyTree() {
+            const searchTerm = document.getElementById('familySearch').value.toLowerCase().replace(/\s+/g, '_');
+            const character = gotData.characters[searchTerm];
+            
+            if (!character) {
+                alert('Character not found! Try names like "jon_snow" or "tyrion_lannister"');
+                return;
+            }
+            
+            const content = document.getElementById('familyTreeContent');
+            const relationships = gotData.relationships[searchTerm] || [];
+            const parents = Object.entries(gotData.relationships).filter(([parent, children]) => 
+                children.includes(searchTerm)
+            ).map(([parent]) => parent);
+            
+            content.innerHTML = `
+                <div class="card">
+                    <h3 style="color: #ffd700;">Family Tree for ${searchTerm.replace(/_/g, ' ')}</h3>
+                    <div class="relationship-tree">
+                        <strong>Parents:</strong> ${parents.length > 0 ? parents.map(p => p.replace(/_/g, ' ')).join(', ') : 'Unknown'}<br>
+                        <strong>Children:</strong> ${relationships.length > 0 ? relationships.map(c => c.replace(/_/g, ' ')).join(', ') : 'None'}<br>
+                        <strong>House:</strong> ${character.house}<br>
+                        <strong>Status:</strong> ${character.status}<br>
+                        <strong>Traits:</strong> ${character.traits.join(', ') || 'None listed'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Alliances functions
+        function loadAlliances() {
+            const content = document.getElementById('alliancesContent');
+            
+            // Generate marriage recommendations
+            const marriageRecommendations = generateMarriageRecommendations();
+            const allianceRecommendations = generateAllianceRecommendations();
+            
+            content.innerHTML = `
+                <div class="card marriage-card">
+                    <h3 style="color: #ff1493;">💒 Strategic Marriage Recommendations</h3>
+                    <p>Based on political alliances, house compatibility, and survival status:</p>
+                    ${marriageRecommendations}
+                </div>
+                
+                <div class="card alliance-card">
+                    <h3 style="color: #32cd32;">🤝 Political Alliance Opportunities</h3>
+                    <p>Strategic partnerships for surviving houses:</p>
+                    ${allianceRecommendations}
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #ffd700;">👑 Current Power Structure</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">👑</span>
+                            <div class="stat-label">King: Bran Stark</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">⭐</span>
+                            <div class="stat-label">Queen in North: Sansa Stark</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">🖐️</span>
+                            <div class="stat-label">Hand: Tyrion Lannister</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">⚔️</span>
+                            <div class="stat-label">Lord Commander: Brienne</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateMarriageRecommendations() {
+            const aliveCharacters = Object.entries(gotData.characters).filter(([_, data]) => data.status === 'alive');
+            const recommendations = [];
+            
+            // Find suitable marriage pairs
+            const males = aliveCharacters.filter(([_, data]) => data.gender === 'male');
+            const females = aliveCharacters.filter(([_, data]) => data.gender === 'female');
+            
+            males.forEach(([maleName, maleData]) => {
+                females.forEach(([femaleName, femaleData]) => {
+                    if (maleData.house !== femaleData.house && maleData.house !== 'none' && femaleData.house !== 'none') {
+                        // Avoid close family (simplified check)
+                        if (!areCloseFamily(maleName, femaleName)) {
+                            recommendations.push({
+                                pair: `${maleName.replace(/_/g, ' ')} & ${femaleName.replace(/_/g, ' ')}`,
+                                reason: `Alliance between House ${maleData.house} and House ${femaleData.house}`,
+                                strategic: calculateStrategicValue(maleData, femaleData)
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Sort by strategic value and take top recommendations
+            recommendations.sort((a, b) => b.strategic - a.strategic);
+            const topRecommendations = recommendations.slice(0, 5);
+            
+            return topRecommendations.map(rec => 
+                `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid #ff1493;">
+                    <strong>${rec.pair}</strong><br>
+                    <em>${rec.reason}</em> (Strategic Value: ${rec.strategic})
+                </div>`
+            ).join('');
+        }
+
+        function generateAllianceRecommendations() {
+            const powerfulHouses = ['stark', 'lannister', 'baratheon', 'greyjoy', 'tarly'];
+            const alliances = [];
+            
+            powerfulHouses.forEach((house1, i) => {
+                powerfulHouses.slice(i + 1).forEach(house2 => {
+                    const house1Power = calculateHousePower(house1);
+                    const house2Power = calculateHousePower(house2);
+                    const synergy = house1Power + house2Power;
+                    
+                    alliances.push({
+                        houses: `House ${house1} & House ${house2}`,
+                        benefit: `Combined military and political strength`,
+                        power: synergy
+                    });
+                });
+            });
+            
+            alliances.sort((a, b) => b.power - a.power);
+            
+            return alliances.slice(0, 5).map(alliance => 
+                `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid #32cd32;">
+                    <strong>${alliance.houses}</strong><br>
+                    <em>${alliance.benefit}</em> (Combined Power: ${alliance.power})
+                </div>`
+            ).join('');
+        }
+
+        function areCloseFamily(name1, name2) {
+            // Simplified family check for major characters
+            const starkFamily = ['jon_snow', 'sansa_stark', 'arya_stark', 'bran_stark'];
+            const lannisterFamily = ['tyrion_lannister', 'cersei_lannister', 'jaime_lannister'];
+            
+            return (starkFamily.includes(name1) && starkFamily.includes(name2)) ||
+                   (lannisterFamily.includes(name1) && lannisterFamily.includes(name2));
+        }
+
+        function calculateStrategicValue(char1, char2) {
+            let value = 0;
+            
+            // Add value for titles
+            if (char1.title) value += 3;
+            if (char2.title) value += 3;
+            
+            // Add value for traits
+            value += char1.traits.length;
+            value += char2.traits.length;
+            
+            // Add value for important houses
+            const importantHouses = ['stark', 'lannister', 'targaryen', 'baratheon'];
+            if (importantHouses.includes(char1.house)) value += 2;
+            if (importantHouses.includes(char2.house)) value += 2;
+            
+            return value;
+        }
+
+        function calculateHousePower(houseName) {
+            const house = gotData.houses[houseName];
+            if (!house) return 0;
+            
+            let power = 0;
+            house.members.forEach(memberName => {
+                const member = gotData.characters[memberName];
+                if (member && member.status === 'alive') {
+                    power += 2; // Base survival value
+                    if (member.title) power += 3; // Title bonus
+                    power += member.traits.length; // Trait bonuses
+                }
+            });
+            
+            return power;
+        }
+
+        // Statistics functions
+        function loadStatistics() {
+            const content = document.getElementById('statisticsContent');
+            
+            const totalCharacters = Object.keys(gotData.characters).length;
+            const aliveCount = Object.values(gotData.characters).filter(char => char.status === 'alive').length;
+            const deadCount = Object.values(gotData.characters).filter(char => char.status === 'dead').length;
+            const maleCount = Object.values(gotData.characters).filter(char => char.gender === 'male').length;
+            const femaleCount = Object.values(gotData.characters).filter(char => char.gender === 'female').length;
+            const titledCount = Object.values(gotData.characters).filter(char => char.title).length;
+            
+            const survivalRate = ((aliveCount / totalCharacters) * 100).toFixed(1);
+            
+            // House analysis
+            const houseStats = Object.entries(gotData.houses).map(([houseName, houseData]) => {
+                const livingMembers = houseData.members.filter(member => gotData.characters[member]?.status === 'alive').length;
+                const totalMembers = houseData.members.length;
+                const survivalRate = totalMembers > 0 ? ((livingMembers / totalMembers) * 100).toFixed(1) : 0;
+                
+                return {
+                    name: houseName,
+                    living: livingMembers,
+                    total: totalMembers,
+                    survival: survivalRate,
+                    power: calculateHousePower(houseName)
+                };
+            }).sort((a, b) => b.power - a.power);
+            
+            content.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">${totalCharacters}</span>
+                        <div class="stat-label">Total Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" style="color: #32cd32;">${aliveCount}</span>
+                        <div class="stat-label">Survivors</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" style="color: #dc143c;">${deadCount}</span>
+                        <div class="stat-label">Casualties</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${survivalRate}%</span>
+                        <div class="stat-label">Survival Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${maleCount}</span>
+                        <div class="stat-label">Male Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${femaleCount}</span>
+                        <div class="stat-label">Female Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${titledCount}</span>
+                        <div class="stat-label">Titled Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${Object.keys(gotData.houses).length}</span>
+                        <div class="stat-label">Major Houses</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #ffd700;">🏰 House Power Rankings</h3>
+                    ${houseStats.map((house, index) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 5px 0; background: rgba(255, 215, 0, 0.1); border-radius: 5px;">
+                            <div>
+                                <strong>#${index + 1} House ${house.name.charAt(0).toUpperCase() + house.name.slice(1)}</strong>
+                                <div style="font-size: 0.9em; color: #ccc;">
+                                    ${house.living}/${house.total} members alive (${house.survival}% survival rate)
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.5em; color: #ffd700;">⚡ ${house.power}</div>
+                                <div style="font-size: 0.8em;">Power Score</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #ffd700;">📊 Final Outcome Analysis</h3>
+                    <div style="line-height: 1.8;">
+                        <p><strong>🏆 Ultimate Winner:</strong> Bran Stark became King of the Six Kingdoms</p>
+                        <p><strong>🐺 Northern Independence:</strong> Sansa Stark became Queen in the North</p>
+                        <p><strong>🔥 Targaryen Legacy:</strong> Ended with Daenerys's death</p>
+                        <p><strong>🦁 Lannister Survival:</strong> Only Tyrion survived, now Hand of the King</p>
+                        <p><strong>⚔️ Notable Survivors:</strong> The Stark children dominated the final power structure</p>
+                        <p><strong>🏰 House Extinction:</strong> Several major houses were completely wiped out</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCharacters();
+        });
+    </script>
+</body>
+</html>
